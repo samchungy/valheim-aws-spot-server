@@ -6,11 +6,9 @@ name: Node.js CI
 on:
   push:
     branches: [master]
-  pull_request:
-    branches: [master]
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,12 +24,6 @@ jobs:
       - name: Build Scripts
         run: yarn build:scripts
 
-  deploy:
-    needs: [build]
-    runs-on: ubuntu-latest
-    if: ${{ github.ref == 'refs/heads/master' }}
-
-    steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
