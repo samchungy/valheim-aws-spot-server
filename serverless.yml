@@ -1,0 +1,188 @@
+service: valheim
+
+frameworkVersion: '2'
+
+plugins:
+  - serverless-esbuild
+  - serverless-offline
+
+variablesResolutionMode: 20210326
+
+package:
+  individually: true
+
+custom:
+  prefix: ${self:service}-${sls:stage}
+  esbuild:
+    bundle: true
+    minify: true
+    sourcemap: true
+    external:
+      - '@aws-sdk/signature-v4-crt'
+  serverless-offline:
+    useChildProcesses: true
+  config:
+    vpc:
+      id: ${file(./scripts/get-default-vpc.js)}
+    bucketName: chungsta-valheim
+    region: ap-southeast-2
+    instanceType: t3.medium
+    serverName: bois-server
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  lambdaHashingVersion: 20201221
+  region: ${self:custom.config.region}
+  environment:
+    REGION: ${self:custom.config.region}
+    LOG_LEVEL: ${env:LOG_LEVEL, 'info'}
+    NODE_OPTIONS: --enable-source-maps
+    NODE_ENV: ${env:NODE_ENV, 'production'}
+    NODE_TLS_REJECT_UNAUTHORIZED: ${env:NODE_TLS_REJECT_UNAUTHORIZED, ''}
+    TZ: UTC
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action: 's3:PutObject'
+          Resource: !Sub ${ValheimSaveBucket.Arn}/*
+        - Effect: Allow
+          Action:
+            - ec2:AssociateAddress
+            - ec2:Describe*
+            - ec2:RequestSpotInstances
+            - ec2:RunInstances
+            - ec2:CreateTags
+            - ec2:CancelSpotInstanceRequests
+            - ec2:TerminateInstances
+            - ssm:SendCommand
+            - ssm:GetCommandInvocation
+          Resource: '*'
+        - Effect: Allow
+          Action: iam:PassRole
+          Resource: !Sub ${ValheimRole.Arn}
+        - Effect: Allow
+          Action: lambda:InvokeFunction
+          Resource:
+            - arn:aws:lambda:${aws:region}:${aws:accountId}:function:${self:custom.prefix}-start-server
+            - arn:aws:lambda:${aws:region}:${aws:accountId}:function:${self:custom.prefix}-stop-server
+
+functions:
+  # Slack
+  start-server:
+    maximumRetryAttempts: 0
+    memorySize: 256
+    timeout: 120
+    environment:
+      INSTANCE_TYPE: ${self:custom.config.instanceType}
+      INSTANCE_IAM_ROLE: !Sub ${ValheimInstanceProfile.Arn}
+      SECURITY_GROUP: !Sub ${ValheimSecurityGroup.GroupId}
+      ELASTIC_IP: !Ref ElasticIP
+      ELASTIC_IP_ALLOCATION_ID: !Sub ${ElasticIP.AllocationId}
+      BUCKET: ${self:custom.config.bucketName}
+      SERVER_NAME: ${self:custom.config.serverName}
+      SERVER_PASSWORD: ${env:SERVER_PASSWORD, 'hello-world'}
+      SERVER_WEBHOOK: ${env:SERVER_WEBHOOK, ''}
+    handler: src/functions/start-server/handler.handler
+    package:
+      patterns:
+        - src/functions/start-server/launch-template-user-data.sh
+        - src/functions/start-server/docker-compose.yml
+
+  stop-server:
+    maximumRetryAttempts: 0
+    environment:
+      BUCKET: ${self:custom.config.bucketName}
+      SERVER_WEBHOOK: ${env:SERVER_WEBHOOK, ''}
+    memorySize: 256
+    timeout: 120
+    handler: src/functions/stop-server/handler.handler
+
+  interactions:
+    maximumRetryAttempts: 0
+    memorySize: 192
+    environment:
+      PREFIX: ${self:custom.prefix}
+      DISCORD_PUBLIC_TOKEN: ${env:DISCORD_PUBLIC_TOKEN}
+    handler: src/functions/interactions/handler.handler
+    events:
+      - http:
+          method: POST
+          path: /interactions
+
+resources:
+  Resources:
+    ValheimSecurityGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupDescription: Valheim security group
+        GroupName: valheim
+        SecurityGroupIngress:
+          - IpProtocol: udp
+            FromPort: 2456
+            ToPort: 2458
+            CidrIp: 0.0.0.0/0
+          - IpProtocol: tcp
+            FromPort: 22
+            ToPort: 22
+            CidrIp: 0.0.0.0/0
+        VpcId: ${self:custom.config.vpc.id}
+
+    ValheimSaveBucket:
+      Type: 'AWS::S3::Bucket'
+      DeletionPolicy: Retain
+      UpdateReplacePolicy: Retain
+      Properties:
+        AccessControl: Private
+        BucketName: ${self:custom.config.bucketName}
+        VersioningConfiguration:
+          Status: Enabled
+        LifecycleConfiguration:
+          Rules:
+            - Id: BackupsRule
+              Prefix: valheim/backups
+              Status: Enabled
+              ExpirationInDays: 7
+              NoncurrentVersionExpirationInDays: 7
+            - Id: SavesRule
+              Prefix: valheim/saves
+              Status: Enabled
+              NoncurrentVersionExpirationInDays: 7
+
+    ValheimRole:
+      Type: 'AWS::IAM::Role'
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - ec2.amazonaws.com
+              Action:
+                - 'sts:AssumeRole'
+        Path: /
+        Policies:
+          - PolicyName: s3-access
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action: 's3:ListBucket'
+                  Resource: !Sub ${ValheimSaveBucket.Arn}
+                - Effect: Allow
+                  Action: 's3:*Object*'
+                  Resource: !Sub ${ValheimSaveBucket.Arn}/*
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+
+    ValheimInstanceProfile:
+      Type: 'AWS::IAM::InstanceProfile'
+      Properties:
+        Path: '/'
+        Roles:
+          - !Ref ValheimRole
+
+    ElasticIP:
+      Type: AWS::EC2::EIP
