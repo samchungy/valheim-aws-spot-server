@@ -33,7 +33,7 @@ jobs:
 
       - name: Deploying Serverless application to AWS
         env:
-          DISCORD_PUBLIC_TOKEN: ${{ env.DISCORD_PUBLIC_TOKEN }}
+          DISCORD_PUBLIC_TOKEN: ${{ secrets.DISCORD_PUBLIC_TOKEN }}
           SERVER_WEBHOOK: ${{ secrets.SERVER_WEBHOOK }}
           SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
         run: yarn deploy
