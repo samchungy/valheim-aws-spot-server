@@ -10,7 +10,7 @@ const invoke = async (
   payload?: Record<string, unknown>
 ) => {
   try {
-    await lambdaClient.send(
+    return await lambdaClient.send(
       new InvokeCommand({
         FunctionName: functionName,
         InvocationType: 'Event',

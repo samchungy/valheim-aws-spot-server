@@ -1,7 +1,4 @@
-import {
-  APIChatInputApplicationCommandInteractionData,
-  APIInteractionGuildMember,
-} from 'discord-api-types/payloads/v9/interactions';
+import {APIChatInputApplicationCommandInteractionData} from 'discord-api-types/payloads/v9/interactions';
 import {config} from 'src/config';
 import {BaseCommand, ValheimCommand} from 'src/domain/commands';
 import {invoke} from 'src/infrastructure/lambda';
@@ -11,7 +8,7 @@ type CommandMap = {
 };
 
 type ValheimCommandMap = {
-  [name in ValheimCommand]: () => Promise<void>;
+  [name in ValheimCommand]: () => Promise<unknown>;
 };
 
 const map: CommandMap = {
@@ -26,10 +23,12 @@ const applicationCommand = async (
 ) => {
   const baseCommand = data.name as BaseCommand;
   const subCommand = data?.options?.[0]?.name as ValheimCommand;
-  await map?.[baseCommand]?.[subCommand]();
+  const result = await map?.[baseCommand]?.[subCommand]?.();
 
-  return `${
-    subCommand.charAt(0).toUpperCase() + subCommand.slice(1)
-  } command received`;
+  const commandType = result
+    ? subCommand.charAt(0).toUpperCase() + subCommand.slice(1)
+    : 'Invalid';
+
+  return `${commandType} command received`;
 };
 export {applicationCommand};
