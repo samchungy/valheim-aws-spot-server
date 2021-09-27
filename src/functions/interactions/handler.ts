@@ -8,7 +8,6 @@ import {
   InteractionType,
 } from 'discord-api-types/payloads/v9';
 import {applicationCommand} from './application-command';
-import {APIBaseApplicationCommandInteractionData} from 'discord-api-types/payloads/v9/_interactions/_applicationCommands/internals';
 
 const handler: APIGatewayProxyHandler = async (event, context) => {
   logger.withRequest(event, context);
