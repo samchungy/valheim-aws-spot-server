@@ -1,5 +1,4 @@
 import {InvokeCommand, LambdaClient} from '@aws-sdk/client-lambda';
-import {StringMap} from 'aws-lambda/trigger/cognito-user-pool-trigger/_common';
 import {config} from 'src/config';
 import {logger} from 'src/logger';
 
