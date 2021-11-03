@@ -27,3 +27,5 @@ SERVER_WEBHOOK
 You can setup Slash commands for your server here: https://discord.com/developers/docs/interactions/application-commands. Use the URL from the API Gateway path as action endpoint for Discord.
 
 bla
+
+2
