@@ -25,3 +25,23 @@ SERVER_WEBHOOK
 
 ## Discord Slash Commands
 You can setup Slash commands for your server here: https://discord.com/developers/docs/interactions/application-commands. Use the URL from the API Gateway path as action endpoint for Discord.
+
+```
+{
+    "name": "valheim",
+    "description": "start or stop the valheim server",
+    "options": [
+        {
+            "name": "start",
+            "description": "Start the valheim server",
+            "type": 1
+        },
+        {
+            "name": "stop",
+            "description": "Stop the valheim server",
+            "type": 1
+        }
+    ],
+    "default_permission": false
+}
+```
