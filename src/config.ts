@@ -7,7 +7,6 @@ interface Config {
   securityGroup: string;
   elasticIp: string;
   elasticIpAllocationId: string;
-  amazonLinuxAmi: string;
   serverName: string;
   serverPassword: string;
   serverWebhook: string;
@@ -26,7 +25,6 @@ const config: Config = {
   securityGroup: env('SECURITY_GROUP') || '',
   elasticIp: env('ELASTIC_IP') || '',
   elasticIpAllocationId: env('ELASTIC_IP_ALLOCATION_ID') || '',
-  amazonLinuxAmi: 'ami-0210560cedcb09f07',
   serverName: env('SERVER_NAME') || '',
   serverPassword: env('SERVER_PASSWORD') || '',
   serverWebhook: env('SERVER_WEBHOOK') || '',
