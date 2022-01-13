@@ -1,5 +1,5 @@
 # Valheim AWS Spot Instance Server
-- Launches a Valheim Server on an EC2 Spot Instance which backs up to S3.
+- Launches a Valheim Server on an EC2 Spot Instance which backs up to S3 all from GitHub Actions.
 - Also creates a receiver for 2 slash commands on Discord - `/valheim start` and `/valheim stop` to start/stop the server.
 
 ## Installation
@@ -44,4 +44,13 @@ You can setup Slash commands for your server here: https://discord.com/developer
     ],
     "default_permission": false
 }
+```
+
+ If you don't wish to use the Discord Slash Command integration you can invoke the start/stop Lambdas using the AWS CLI. eg.
+
+```
+aws lambda invoke \
+    --function-name valheim-dev-start-server \
+    --invocation-type Event \
+    --payload '{}'
 ```
