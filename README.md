@@ -24,7 +24,14 @@ SERVER_WEBHOOK # Discord Server Webhook URL
 5. You can remove the Elastic IP option if you want to save a bit more money.
 
 ## Discord Slash Commands
-You can setup Slash commands for your server here: https://discord.com/developers/docs/interactions/application-commands. Use the URL from the API Gateway path as action endpoint for Discord.
+You can setup Slash commands for your server here: https://discord.com/developers/docs/interactions/application-commands. Use the URL from the API Gateway path as the action endpoint for Discord. It will appear in the action's logs like this: 
+
+```
+endpoints:
+  POST - https://RANDOMID.execute-api.REGION.amazonaws.com/dev/interactions
+```
+
+### Slash Command Discord API Sample Request Payload
 
 ```
 {
@@ -46,7 +53,7 @@ You can setup Slash commands for your server here: https://discord.com/developer
 }
 ```
 
- If you don't wish to use the Discord Slash Command integration you can invoke the start/stop Lambdas using the AWS CLI. eg.
+If you don't wish to use the Discord Slash Command integration you can invoke the start/stop Lambdas using the AWS CLI. eg.
 
 ```
 aws lambda invoke \
