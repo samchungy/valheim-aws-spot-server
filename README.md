@@ -21,7 +21,7 @@ SERVER_WEBHOOK # Discord Server Webhook URL
 
 4. Run the workflow. Profit.
 
-5. You can remove the Elastic IP option if you want to save a bit more money.
+5. You can remove the Elastic IP option if you want to save a bit more money. Just delete all configuration with `ElasticIP` in it from the `serverless.yml` file. It will spit out the designated IP on every start.
 
 ## Discord Slash Commands
 You can setup Slash commands for your server here: https://discord.com/developers/docs/interactions/application-commands. Use the URL from the API Gateway path as the action endpoint for Discord. It will appear in the action's logs like this: 
