@@ -60,6 +60,7 @@ provider:
             - ssm:GetParameter
             - ssm:SendCommand
             - ssm:GetCommandInvocation
+            - iam:CreateServiceLinkedRole
           Resource: '*'
         - Effect: Allow
           Action: iam:PassRole
