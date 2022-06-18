@@ -43,7 +43,7 @@ provider:
     TZ: UTC
   iam:
     role:
-      ManagedPolicyArns:
+      managedPolicies:
         - arn:aws:iam::aws:policy/aws-service-role/AWSEC2SpotFleetServiceRolePolicy
       statements:
         - Effect: Allow
