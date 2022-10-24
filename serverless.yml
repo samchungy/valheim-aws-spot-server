@@ -81,8 +81,8 @@ functions:
       INSTANCE_TYPE: ${self:custom.config.instanceType}
       INSTANCE_IAM_ROLE: !Sub ${ValheimInstanceProfile.Arn}
       SECURITY_GROUP: !Sub ${ValheimSecurityGroup.GroupId}
-      ELASTIC_IP: !Ref ElasticIP
-      ELASTIC_IP_ALLOCATION_ID: !Sub ${ElasticIP.AllocationId}
+      # ELASTIC_IP: !Ref ElasticIP
+      # ELASTIC_IP_ALLOCATION_ID: !Sub ${ElasticIP.AllocationId}
       BUCKET: ${self:custom.config.bucketName}
       SERVER_NAME: ${self:custom.config.serverName}
       SERVER_PASSWORD: ${env:SERVER_PASSWORD, 'hello-world'}
@@ -187,5 +187,5 @@ resources:
         Roles:
           - !Ref ValheimRole
 
-    ElasticIP:
-      Type: AWS::EC2::EIP
+    # ElasticIP:
+    #   Type: AWS::EC2::EIP

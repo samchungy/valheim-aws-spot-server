@@ -31,7 +31,7 @@
   },
   "scripts": {
     "build:scripts": "esbuild scripts/*.ts --format=cjs --outdir=scripts",
-    "deploy": "sls deploy",
+    "deploy": "sls deploy --force --verbose",
     "offline": "NODE_ENV=local NODE_TLS_REJECT_UNAUTHORIZED=0 sls offline start",
     "lint": "gts lint",
     "clean": "gts clean",
