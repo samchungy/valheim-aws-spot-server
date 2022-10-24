@@ -1,3 +1,4 @@
+import {InvokeCommandOutput} from '@aws-sdk/client-lambda';
 import {APIChatInputApplicationCommandInteractionData} from 'discord-api-types/payloads/v9/interactions';
 import {config} from 'src/config';
 import {BaseCommand, ValheimCommand} from 'src/domain/commands';
@@ -8,7 +9,7 @@ type CommandMap = {
 };
 
 type ValheimCommandMap = {
-  [name in ValheimCommand]: () => Promise<unknown>;
+  [name in ValheimCommand]: () => Promise<InvokeCommandOutput>;
 };
 
 const map: CommandMap = {

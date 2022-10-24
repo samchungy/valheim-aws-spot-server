@@ -2,7 +2,6 @@ service: valheim
 
 plugins:
   - serverless-esbuild
-  - serverless-offline
 
 package:
   individually: true
