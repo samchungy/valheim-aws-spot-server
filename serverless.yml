@@ -1,15 +1,13 @@
 service: valheim
 
-frameworkVersion: '2'
-
 plugins:
   - serverless-esbuild
   - serverless-offline
 
-variablesResolutionMode: 20210326
-
 package:
   individually: true
+
+configValidationMode: error
 
 custom:
   prefix: ${self:service}-${sls:stage}
@@ -19,8 +17,6 @@ custom:
     sourcemap: true
     external:
       - '@aws-sdk/signature-v4-crt'
-  serverless-offline:
-    useChildProcesses: true
   config:
     vpc:
       id: ${file(./scripts/get-default-vpc.js)}
@@ -31,8 +27,9 @@ custom:
 
 provider:
   name: aws
-  runtime: nodejs14.x
-  lambdaHashingVersion: 20201221
+  runtime: nodejs16.x
+  architecture: arm64
+  deploymentMethod: direct
   region: ${self:custom.config.region}
   environment:
     REGION: ${self:custom.config.region}
