@@ -11,6 +11,8 @@ import {
 import {config} from 'src/config';
 import {getLaunchTemplate} from './get-launch-template';
 import {postMessage} from 'src/infrastructure/discord';
+import {GetParameterCommand} from '@aws-sdk/client-ssm';
+import {ssmClient} from 'src/infrastructure/ssmClient';
 
 const queryIsServerRunning = async (): Promise<boolean> => {
   logger.info(
@@ -41,6 +43,31 @@ const queryIsServerRunning = async (): Promise<boolean> => {
   }
 };
 
+const getLatestAmazonAMI = async (): Promise<string> => {
+  logger.info({activity: 'getLatestAmazonAMI'}, 'Retrieving latest Amazon AMI');
+
+  try {
+    const request = new GetParameterCommand({
+      Name: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2',
+    });
+    const response = await ssmClient.send(request);
+
+    const ami = response.Parameter?.Value;
+
+    if (!ami) {
+      throw new Error('Could not get latest AMI');
+    }
+
+    return ami;
+  } catch (err) {
+    logger.error(
+      {err, activity: 'getLatestAmazonAMI'},
+      'Retrieving latest Amazon AMI failed'
+    );
+    throw err;
+  }
+};
+
 const requestSpotInstance = async (userData: Buffer) => {
   logger.info(
     {activity: 'requestSpotInstance'},
@@ -56,7 +83,7 @@ const requestSpotInstance = async (userData: Buffer) => {
         },
         InstanceType: config.instanceType,
         SecurityGroupIds: [config.securityGroup],
-        ImageId: 'resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2',
+        ImageId: await getLatestAmazonAMI(),
       },
       TagSpecifications: [
         {
